@@ -18,7 +18,7 @@ verify: prepare
 prepare: generate-key kill-gpg-agent
 
 kill-gpg-agent:
-	killall gpg-agent
+	killall gpg-agent || true
 
 # -- Generate the key --
 generate-key: virtualenv
