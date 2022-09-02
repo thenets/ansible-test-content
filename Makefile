@@ -1,6 +1,7 @@
 SHELL:=/bin/bash
 
-CUSTOM_GNUPG_HOME:=$$(mktemp -d)
+#CUSTOM_GNUPG_HOME:=$$(mktemp -d)
+CUSTOM_GNUPG_HOME:=~/.gnupg
 
 all: clean generate-key sign
 
@@ -14,17 +15,16 @@ verify: prepare
 	./venv/bin/ansible-sign --debug project gpg-verify \
 		--gnupg-home $(CUSTOM_GNUPG_HOME) .
 
-prepare: generate-key import-key kill-gpg-agent
+prepare: generate-key kill-gpg-agent
 
 kill-gpg-agent:
 	killall gpg-agent
 
 # -- Generate the key --
-generate-and-import: generate-key import-key
-
 generate-key: virtualenv
 	if [ ! -f keys.json ]; then \
 		./venv/bin/python ansible_sign_gen_key.py > keys.json; \
+		make import-key; \
 	fi
 
 list-keys:
