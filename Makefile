@@ -1,18 +1,23 @@
 SHELL:=/bin/bash
 
-CUSTOM_GNUPG_HOME=~/.gnupg
+CUSTOM_GNUPG_HOME:=$$(mktemp -d)
 
 all: clean generate-key sign
 
 # -- Sign and verify --
-sign: generate-key
+sign: prepare
 	ANSIBLE_SIGN_GPG_PASSPHRASE="$$(cat keys.json | jq .passphrase -r)" \
 		./venv/bin/ansible-sign --debug project gpg-sign \
 			--gnupg-home $(CUSTOM_GNUPG_HOME) .
 
-verify: generate-key
+verify: prepare
 	./venv/bin/ansible-sign --debug project gpg-verify \
 		--gnupg-home $(CUSTOM_GNUPG_HOME) .
+
+prepare: generate-key import-key kill-gpg-agent
+
+kill-gpg-agent:
+	killall gpg-agent
 
 # -- Generate the key --
 generate-and-import: generate-key import-key
@@ -23,11 +28,11 @@ generate-key: virtualenv
 	fi
 
 list-keys:
-	gpg --list-secret-keys
+	gpg --homedir $(CUSTOM_GNUPG_HOME) --list-secret-keys
 
 import-key:
 	cat keys.json | jq .secret_key -r | \
-		gpg --import --batch --passphrase $$(cat keys.json | jq .passphrase -r) $${SECRET_KEY_FILE_PATH}
+		gpg --homedir $(CUSTOM_GNUPG_HOME) --import --batch --passphrase $$(cat keys.json | jq .passphrase -r) $${SECRET_KEY_FILE_PATH}
 
 # -- Other --
 virtualenv:
