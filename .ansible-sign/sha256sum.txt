@@ -1,2 +1,0 @@
-a1961ef7343ffb38b70820b0a82c805c7b3eab54a1dc85777d376de341bfcee3  MANIFEST.in
-9f9505d374c7f7db8522cf6650d676bed6977ff9db7bcc12cca11cf761f33f62  playbooks/chatty_tasks.yml

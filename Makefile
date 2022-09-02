@@ -5,20 +5,22 @@ CUSTOM_GNUPG_HOME=~/.gnupg
 all: clean generate-key sign
 
 # -- Sign and verify --
-sign: virtualenv
+sign: generate-key
 	ANSIBLE_SIGN_GPG_PASSPHRASE="$$(cat keys.json | jq .passphrase -r)" \
 		./venv/bin/ansible-sign --debug project gpg-sign \
 			--gnupg-home $(CUSTOM_GNUPG_HOME) .
 
-verify: virtualenv
-	./venv/bin/ansible-sign project gpg-verify \
+verify: generate-key
+	./venv/bin/ansible-sign --debug project gpg-verify \
 		--gnupg-home $(CUSTOM_GNUPG_HOME) .
 
 # -- Generate the key --
 generate-and-import: generate-key import-key
 
 generate-key: virtualenv
-	./venv/bin/python ansible_sign_gen_key.py > keys.json
+	if [ ! -f keys.json ]; then \
+		./venv/bin/python ansible_sign_gen_key.py > keys.json; \
+	fi
 
 list-keys:
 	gpg --list-secret-keys
