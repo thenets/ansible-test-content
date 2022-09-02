@@ -3,7 +3,7 @@
 - hosts: all
   gather_facts: false
   vars:
-    num_messages: 51
+    num_messages: 50
   tasks:
     - debug:
         msg: "This is a debug message: {{ item }}"
